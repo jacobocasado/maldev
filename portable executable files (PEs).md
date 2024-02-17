@@ -4,14 +4,14 @@
 In a nutshell, consider PE as a book. Contains the text, has an index, information about the book, etc. 
 
 PE file have **headers and sections**. That is the first separation when we look a PE file internally.
-![[Pasted image 20240210094511.png]]
+![](attachments/Pasted%20image%2020240210094511.png)
 Let's analyze the image. We can see the headers (information about the executable, metadata) and then sections. The sections are the real contents of the executable (the code, the imports from Windows libraries and the data used by the code, like strings).
 
 # Analyzing PEs practically
 Let's use PEbear to analyze the calc.exe program in Windows/System32/calc.exe.
 
 We can see the sections, which is what really interests us, and see that there are several of them:
-![[Pasted image 20240210095559.png]]
+![](attachments/Pasted%20image%2020240210095559.png)
 
 I will describe briefly each of the sections:
 - .text: The code that will be executed. This will be, from what I know, read and executed.
@@ -23,7 +23,7 @@ I will describe briefly each of the sections:
 
 ## Analyzing the resources in a PE.
 We can use PEbear to look for the .rsrc section, which is pretty interesting for us:
-![[Pasted image 20240210095820.png]]
+![](attachments/Pasted%20image%2020240210095820.png)
 We can see that literaly, there are images, manifests, in the .rsrc section and we can see the content.
 
 # EXEs vs DLL
