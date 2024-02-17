@@ -1,10 +1,6 @@
 # Processes
-Instance of an executable. Container that has everything needed for a program to run (code, data, memory...). BUT, single thread. Each thread has its own process.
-
-If an application has one thread, it has one process. Therefore, an application can have more than one process attached to it, one per each thread; e.g., chrome spawn a new process for each tab that we create. 
-
+Instance of an executable. Container that has everything needed for a program to run (code, data, memory...). 
 Also, an application can have a single process and this process can spawn MULTIPLE processes; these processes are called "child processes".
-
 Typically, the process **does not know how to communicate with other process**. Each process has its own **virtual address space**, VA space. Remember that processes think they are alone in the computer.
 
 Application processes, background processes, window processes.
