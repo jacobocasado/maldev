@@ -89,3 +89,5 @@ We can even see that the PID that we printed getting pi.dwProcessId is the same 
 ![](attachments/processes,%20threads%20and%20handles-6.png)
 We managed also to specify the CPU cycle priority below normal, which gets reflected in task manager: 
 ![](attachments/processes,%20threads%20and%20handles-7.png)
+
+

