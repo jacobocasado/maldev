@@ -1,0 +1,7 @@
+﻿     Creating library C:\Users\MALDEV01\Desktop\RTO\07.Code_Injection\03.Shellcode-jaco\process_injection\x64\Release\injected.lib and object C:\Users\MALDEV01\Desktop\RTO\07.Code_Injection\03.Shellcode-jaco\process_injection\x64\Release\injected.exp
+  Generating code
+  0 of 2 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  injected_dll.vcxproj -> C:\Users\MALDEV01\Desktop\RTO\07.Code_Injection\03.Shellcode-jaco\process_injection\x64\Release\injected.dll

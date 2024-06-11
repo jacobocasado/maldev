@@ -1,0 +1,16 @@
+﻿  thread_context_injection.cpp
+Z:\getprocaddress_getmodulehandle\thread_context_injection\thread_context_injection.cpp(6,2): error C2065: 'PROCESSENTRY32': undeclared identifier
+Z:\getprocaddress_getmodulehandle\thread_context_injection\thread_context_injection.cpp(6,17): error C2146: syntax error: missing ';' before identifier 'pe'
+Z:\getprocaddress_getmodulehandle\thread_context_injection\thread_context_injection.cpp(6,17): error C2065: 'pe': undeclared identifier
+Z:\getprocaddress_getmodulehandle\thread_context_injection\thread_context_injection.cpp(10,2): error C3861: 'printf': identifier not found
+Z:\getprocaddress_getmodulehandle\thread_context_injection\thread_context_injection.cpp(21,39): error C2065: 'TH32CS_SNAPPROCESS': undeclared identifier
+Z:\getprocaddress_getmodulehandle\thread_context_injection\thread_context_injection.cpp(21,14): error C3861: 'CreateToolhelp32Snapshot': identifier not found
+Z:\getprocaddress_getmodulehandle\thread_context_injection\thread_context_injection.cpp(27,2): error C2065: 'pe': undeclared identifier
+Z:\getprocaddress_getmodulehandle\thread_context_injection\thread_context_injection.cpp(27,21): error C2065: 'PROCESSENTRY32W': undeclared identifier
+Z:\getprocaddress_getmodulehandle\thread_context_injection\thread_context_injection.cpp(38,40): error C2065: 'pe': undeclared identifier
+Z:\getprocaddress_getmodulehandle\thread_context_injection\thread_context_injection.cpp(38,12): error C3861: 'Process32FirstW': identifier not found
+Z:\getprocaddress_getmodulehandle\thread_context_injection\thread_context_injection.cpp(56,36): error C2065: 'pe': undeclared identifier
+Z:\getprocaddress_getmodulehandle\thread_context_injection\thread_context_injection.cpp(56,9): error C3861: 'process32NextW': identifier not found
+Z:\getprocaddress_getmodulehandle\thread_context_injection\thread_context_injection.cpp(57,16): error C2065: 'pe': undeclared identifier
+Z:\getprocaddress_getmodulehandle\thread_context_injection\thread_context_injection.cpp(58,10): error C2065: 'pe': undeclared identifier
+Z:\getprocaddress_getmodulehandle\thread_context_injection\thread_context_injection.cpp(70,2): error C3861: 'printf': identifier not found

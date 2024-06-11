@@ -1,0 +1,3 @@
+﻿  remote_view_injection.cpp
+Z:\getprocaddress_getmodulehandle\thread_context_injection\remote_view_injection.cpp(64): warning C4715: 'getHandleToThread': not all control paths return a value
+  thread_context_injection.vcxproj -> Z:\getprocaddress_getmodulehandle\x64\Debug\thread_context_injection.exe

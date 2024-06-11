@@ -1,0 +1,5 @@
+﻿C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(531,5): warning MSB8028: The intermediate directory (x64\Debug\) contains files shared from another project (injected_dll.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  dllmain.cpp
+  LINK : C:\Users\MALDEV01\Desktop\RTO\07.Code_Injection\03.Shellcode-jaco\process_injection\x64\Debug\injected.dll not found or not built by the last incremental link; performing full link
+     Creating library C:\Users\MALDEV01\Desktop\RTO\07.Code_Injection\03.Shellcode-jaco\process_injection\x64\Debug\injected.lib and object C:\Users\MALDEV01\Desktop\RTO\07.Code_Injection\03.Shellcode-jaco\process_injection\x64\Debug\injected.exp
+  injected_dll.vcxproj -> C:\Users\MALDEV01\Desktop\RTO\07.Code_Injection\03.Shellcode-jaco\process_injection\x64\Debug\injected.dll

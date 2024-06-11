@@ -1,2 +1,1 @@
-el DLL se mete enteor? o solo las funciones que se usan
-se copia el DLL o se hace puntero a la zona de memoria del DLL? entiendo que se copia en cada proceso el DLL
+1. In [[thread_context_injection]], what happens if we modify the EIP once our shellcode has been executed+

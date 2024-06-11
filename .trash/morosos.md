@@ -1,0 +1,10 @@
+ek0x 17.60
+wice 20.70
+ismael 17.60
+edu 26
+vlopez 31.50
+cristina 24.53
+enrique 28.93
+adrian 29
+carlos 33
+akemp 30

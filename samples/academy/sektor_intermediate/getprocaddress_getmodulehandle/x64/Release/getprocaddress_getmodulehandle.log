@@ -1,0 +1,7 @@
+﻿  helpers.cpp
+Z:\getprocaddress_getmodulehandle\getprocaddress_getmodulehandle\helpers.cpp(60,24): warning C4302: 'type cast': truncation from 'const char *' to 'WORD'
+  main.cpp
+Z:\getprocaddress_getmodulehandle\getprocaddress_getmodulehandle\main.cpp(9,9): warning C4475: 'printf' : length modifier 'l' cannot be used with type field character 'p' in format specifier
+Z:\getprocaddress_getmodulehandle\getprocaddress_getmodulehandle\main.cpp(10,9): warning C4475: 'printf' : length modifier 'l' cannot be used with type field character 'p' in format specifier
+  Generating Code...
+  getprocaddress_getmodulehandle.vcxproj -> Z:\getprocaddress_getmodulehandle\x64\Release\getprocaddress_getmodulehandle.exe

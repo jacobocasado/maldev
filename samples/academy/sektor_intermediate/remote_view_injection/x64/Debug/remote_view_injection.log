@@ -1,0 +1,5 @@
+﻿  remote_view_injection.cpp
+Z:\getprocaddress_getmodulehandle\remote_view_injection\remote_view_injection.cpp(103,32): warning C4838: conversion from 'SIZE_T' to 'DWORD' requires a narrowing conversion
+Z:\getprocaddress_getmodulehandle\remote_view_injection\remote_view_injection.cpp(103,32): warning C4244: 'initializing': conversion from 'SIZE_T' to 'DWORD', possible loss of data
+Z:\getprocaddress_getmodulehandle\remote_view_injection\remote_view_injection.cpp(63): warning C4715: 'getHandleToThread': not all control paths return a value
+  remote_view_injection.vcxproj -> Z:\getprocaddress_getmodulehandle\x64\Debug\remote_view_injection.exe
